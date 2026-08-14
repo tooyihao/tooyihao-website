@@ -50,3 +50,31 @@ a { -webkit-tap-highlight-color: transparent; }
  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 .language-switch{display:flex;align-items:center;gap:7px;border:1px solid #e2e2e6;border-radius:999px;background:rgba(255,255,255,.72);padding:5px 9px;color:#999}.language-switch button{font-size:10px;font-weight:650;transition:.2s}.language-switch button.active{color:#0876e8}.language-switch i{width:1px;height:11px;background:#ddd}.products-hero{background:radial-gradient(circle at 75% 20%,rgba(121,91,234,.14),transparent 28%),linear-gradient(180deg,#f7faff,#fff)}.product-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.product-card{position:relative;min-height:570px;overflow:hidden;border:1px solid #e2e2e6;border-radius:32px;background:#fff;padding:36px;box-shadow:0 15px 45px rgba(20,30,60,.05);transition:transform .3s,box-shadow .3s}.product-card:hover{transform:translateY(-5px);box-shadow:0 24px 65px rgba(20,30,60,.1)}.product-card:before{content:"";position:absolute;width:330px;height:330px;right:-150px;top:-170px;border-radius:50%;background:radial-gradient(circle,rgba(39,132,245,.16),transparent 68%)}.product-1:before{background:radial-gradient(circle,rgba(128,88,236,.16),transparent 68%)}.product-2:before{background:radial-gradient(circle,rgba(38,188,159,.15),transparent 68%)}.product-3:before{background:radial-gradient(circle,rgba(240,155,54,.16),transparent 68%)}.product-card-top{display:flex;justify-content:space-between;align-items:center}.product-number{font-size:11px;color:#999;letter-spacing:.12em}.status-live,.status-soon{border-radius:999px;padding:7px 10px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em}.status-live{background:#e7f8ed;color:#24844a}.status-soon{background:#f1f1f3;color:#777}.product-symbol{display:grid;place-items:center;width:64px;height:64px;margin-top:55px;border-radius:19px;background:linear-gradient(135deg,#1685f8,#765bea);color:#fff;box-shadow:0 15px 30px rgba(60,105,220,.22)}.product-card h3{margin-top:12px;font-size:34px;font-weight:600;letter-spacing:-.045em}.product-description{margin-top:17px;max-width:500px;color:#6e6e73;line-height:1.65}.product-points{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}.product-points p{display:flex;align-items:center;gap:6px;border-radius:999px;background:#f5f5f7;padding:8px 11px;font-size:11px}.product-link{position:absolute;bottom:36px;display:flex;align-items:center;gap:7px;color:#0876e8;font-size:13px;font-weight:650}.product-link.muted{color:#999}@media(max-width:800px){.product-grid{grid-template-columns:1fr}.product-card{min-height:540px}}
+
+/* The Chinese experience is art-directed independently rather than inheriting
+   the English measure and rhythm. Newlines in Chinese copy are intentional. */
+.zh-experience :where(.hero-intro,.section-title,.section-copy,.feature-copy h3,.feature-copy>p,.problem-card h3,.problem-card>p,.step-card h3,.step-card p,.book-panel h2,.book-panel p) { white-space: pre-line; text-wrap: auto; }
+.zh-experience .hero-title { max-width: 11em; font-size: clamp(58px, 8.5vw, 104px); line-height: 1.06; font-weight: 620; letter-spacing: -.055em; }
+.zh-experience .hero-intro { max-width: 23em; margin-top: 32px; font-size: 20px; line-height: 1.9; font-weight: 400; letter-spacing: .015em; }
+.zh-experience .section-title { max-width: 12em; font-size: clamp(44px, 6.4vw, 76px); line-height: 1.16; font-weight: 620; letter-spacing: -.045em; }
+.zh-experience .text-center .section-title { margin-inline: auto; }
+.zh-experience .section-copy { max-width: 34em; margin-top: 28px; font-size: 18px; line-height: 1.9; }
+.zh-experience .feature-stage { grid-template-columns: .9fr 1.1fr; gap: 88px; padding: 82px; }
+.zh-experience .feature-copy h3 { max-width: 8em; font-size: 46px; line-height: 1.2; font-weight: 600; }
+.zh-experience .feature-copy>p { max-width: 24em; font-size: 16px; line-height: 1.9; }
+.zh-experience .problem-card { padding: 38px; }
+.zh-experience .problem-card h3 { font-size: 22px; line-height: 1.45; font-weight: 600; }
+.zh-experience .step-card { min-height: 330px; padding: 44px; }
+.zh-experience .step-card h3 { font-size: 31px; font-weight: 600; }
+.zh-experience .step-card p { max-width: 18em; line-height: 1.9; }
+.zh-experience .pricing-card { grid-template-columns: .9fr 1.1fr; padding: 62px; }
+.zh-experience .faq-item button { padding-block: 26px; font-size: 18px; font-weight: 600; }
+.zh-experience .faq-item>p { max-width: 38em; padding-bottom: 28px; line-height: 1.9; }
+.zh-experience .cta-primary,.zh-experience .cta-secondary,.zh-experience .cta-white { min-width: 168px; justify-content: center; padding: 15px 26px; }
+.zh-products .products-hero h1 { max-width: 10em; font-size: clamp(58px,8vw,92px); line-height: 1.12; font-weight: 620; }
+.zh-products .products-hero .section-copy { max-width: 31em; }
+.zh-products .product-card { padding: 42px; }
+.zh-products .product-description { max-width: 25em; font-size: 16px; line-height: 1.9; }
+@media(max-width:800px){.zh-experience .feature-stage{padding:48px 28px;gap:52px}.zh-experience .hero-title{font-size:clamp(50px,14vw,70px)}.zh-experience .section-title{font-size:clamp(40px,11vw,58px)}.zh-experience .pricing-card{padding:42px 28px}.zh-products .products-hero h1{font-size:clamp(50px,13vw,68px)}}
+@media(max-width:520px){.zh-experience .section-title br{display:initial}.zh-experience .hero-intro{font-size:17px;line-height:1.85}.zh-experience .feature-copy h3{font-size:38px}}
+.zh-products .products-hero h1 { white-space: pre-line; text-wrap: auto; }
