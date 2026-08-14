@@ -28,37 +28,51 @@ export function LeadflowDashboard(){const leads=[['Sarah Chen','Acme Studio','94
 export function LiveDemo(){
   const {locale}=useI18n();
   const zh=locale==="zh";
+  type IntentLevel="low"|"medium"|"high";
+  type Scenario={text:string;zh:string;score:number;level:IntentLevel};
+  const industries:{id:string;label:string;zh:string;emoji:string;scenarios:Scenario[]}[]=[
+    {id:"restaurant",label:"Restaurant",zh:"餐厅",emoji:"🍽",scenarios:[
+      {text:"Do you have a table tonight?",zh:"今晚还有桌位吗？",score:78,level:"medium"},{text:"Can I book for 8 people?",zh:"可以预订 8 人桌吗？",score:84,level:"medium"},{text:"Is today's special still available?",zh:"今天的特色菜还有吗？",score:34,level:"low"},{text:"Are you open now?",zh:"你们现在营业吗？",score:27,level:"low"}]},
+    {id:"gym",label:"Gym",zh:"健身房",emoji:"🏋️",scenarios:[
+      {text:"How much is membership?",zh:"会员费用是多少？",score:64,level:"medium"},{text:"Can I try a free class?",zh:"可以免费试课吗？",score:73,level:"medium"},{text:"Is personal training available?",zh:"有私人教练服务吗？",score:38,level:"low"},{text:"Do you have monthly plans?",zh:"有月付方案吗？",score:59,level:"medium"}]},
+    {id:"property",label:"Property",zh:"房产",emoji:"🏠",scenarios:[
+      {text:"Is this unit still available?",zh:"这个单位还在售吗？",score:39,level:"low"},{text:"Can I arrange a viewing?",zh:"可以安排看房吗？",score:82,level:"medium"},{text:"What is the starting price?",zh:"起售价是多少？",score:67,level:"medium"},{text:"Is there any promotion?",zh:"目前有优惠吗？",score:58,level:"medium"}]},
+    {id:"b2b",label:"B2B",zh:"企业服务",emoji:"💼",scenarios:[
+      {text:"Can you send a quotation?",zh:"可以发送一份报价吗？",score:69,level:"medium"},{text:"We'd like to discuss cooperation.",zh:"我们想洽谈合作。",score:93,level:"high"},{text:"Our company is interested.",zh:"我们公司对此有兴趣。",score:91,level:"high"},{text:"Can we schedule a meeting?",zh:"可以安排一次会议吗？",score:96,level:"high"},{text:"We'd like to purchase 500 units.",zh:"我们想采购 500 件。",score:99,level:"high"}]},
+  ];
+  const [industry,setIndustry]=useState(industries[0].id);
   const [message,setMessage]=useState("");
   const [step,setStep]=useState(-1);
-  const running=step>=0&&step<8;
-  useEffect(()=>{if(!running)return;const delays=[1050,1050,850,800,1100,800,800,850];const timer=window.setTimeout(()=>setStep(current=>current+1),delays[step]);return()=>window.clearTimeout(timer)},[step,running]);
+  const [selection,setSelection]=useState<Scenario>({text:"",zh:"",score:62,level:"medium"});
+  const activeIndustry=industries.find(item=>item.id===industry)!;
+  const workflow={
+    low:[{label:zh?"正在读取…":"Reading…",icon:MessageSquareText},{label:zh?"意向识别…":"Intent Detection…",icon:Sparkles},{label:zh?"CRM 已创建":"CRM Created",icon:Database}],
+    medium:[{label:zh?"正在读取…":"Reading…",icon:MessageSquareText},{label:zh?"意向识别…":"Intent Detection…",icon:Sparkles},{label:zh?"线索已识别…":"Lead Qualified…",icon:BarChart3},{label:zh?"CRM 已创建…":"CRM Created…",icon:Database},{label:zh?"邮件已生成":"Email Generated",icon:Send}],
+    high:[{label:zh?"正在读取…":"Reading…",icon:MessageSquareText},{label:zh?"意向识别…":"Intent Detection…",icon:Sparkles},{label:`${zh?"线索评分":"Lead Score"} ${selection.score}`,icon:BarChart3},{label:zh?"高优先级":"Priority High",icon:Zap},{label:zh?"CRM 已创建":"CRM Created",icon:Database},{label:zh?"邮件已发送":"Email Sent",icon:Send},{label:zh?"销售已通知":"Sales Notified",icon:Bell}],
+  };
+  const milestones=workflow[selection.level];
+  const running=step>=0&&step<milestones.length;
+  useEffect(()=>{if(!running)return;const timer=window.setTimeout(()=>setStep(current=>current+1),850);return()=>window.clearTimeout(timer)},[step,running,milestones.length]);
   const reset=()=>{setStep(-1);setMessage("")};
-  const milestones=[
-    {label:zh?"正在读取消息…":"Reading message…",icon:MessageSquareText},
-    {label:zh?"正在分析意向…":"Analyzing intent…",icon:Sparkles},
-    {label:zh?"线索评分":"Lead Score",icon:BarChart3},
-    {label:zh?"优先级":"Priority",icon:Zap},
-    {label:zh?"建议回复":"Suggested Reply",icon:MessageSquareText},
-    {label:zh?"CRM 已创建":"CRM Created",icon:Database},
-    {label:zh?"邮件已生成":"Email Generated",icon:Send},
-    {label:zh?"销售已通知":"Sales Notified",icon:Bell},
-  ];
+  const start=(scenario?:Scenario)=>{const chosen=scenario??{text:message,zh:message,score:62,level:"medium" as IntentLevel};if(scenario)setMessage(zh?scenario.zh:scenario.text);setSelection(chosen);setStep(0)};
+  const priority=selection.level==="high"?(zh?"高优先级":"High priority"):selection.level==="medium"?(zh?"中优先级":"Medium priority"):(zh?"低优先级":"Low priority");
   return <div className="leadflow-lab">
     <div className="lab-toolbar"><div><span className="lab-mark"><Sparkles size={15}/></span><p><b>AI LeadFlow</b><small>{zh?"智能线索工作台":"Intelligent lead workspace"}</small></p></div><span className="lab-live"><i/>{zh?"系统在线":"SYSTEM ONLINE"}</span></div>
     <div className="lab-grid">
-      <form className="lab-form" onSubmit={e=>{e.preventDefault();setStep(0)}}>
+      <form className="lab-form" onSubmit={e=>{e.preventDefault();start()}}>
         <div className="lab-form-title"><span>01</span><div><h3>{zh?"输入客户咨询":"Paste a customer message"}</h3><p>{zh?"看看 AI 如何从第一句话开始接手。":"Watch AI take it from the very first word."}</p></div></div>
-        <label>{zh?"客户消息":"Customer Message"}<textarea autoFocus value={message} onChange={e=>setMessage(e.target.value.slice(0,500))} placeholder={zh?"你好，\n我想了解你们的服务和报价。":"Hi,\nI'd like to know more about your services..."} required disabled={running}/><span className="character-count">{message.length}/500</span></label>
+        <div className="industry-tabs" role="tablist" aria-label={zh?"选择行业":"Choose an industry"}>{industries.map(item=><button type="button" role="tab" aria-selected={industry===item.id} className={industry===item.id?"active":""} onClick={()=>{setIndustry(item.id);setStep(-1)}} key={item.id}><span>{item.emoji}</span>{zh?item.zh:item.label}</button>)}</div>
+        <AnimatePresence mode="wait"><motion.div className="scenario-list" key={industry} initial={{opacity:0,y:5}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-5}} transition={{duration:.2}}>{activeIndustry.scenarios.map(scenario=><button type="button" className={message===(zh?scenario.zh:scenario.text)?"active":""} disabled={running} onClick={()=>start(scenario)} key={scenario.text}>{zh?scenario.zh:scenario.text}<ArrowRight size={13}/></button>)}</motion.div></AnimatePresence>
+        <label>{zh?"客户消息":"Customer Message"}<textarea value={message} onChange={e=>setMessage(e.target.value.slice(0,500))} placeholder={zh?"选择上方的真实咨询，或输入一条消息。":"Choose a real inquiry above, or type your own."} required disabled={running}/><span className="character-count">{message.length}/500</span></label>
         <button className="lab-analyze" disabled={running||!message.trim()}>{running?<><LoaderCircle className="lab-spinner" size={17}/>{zh?"AI 正在工作…":"AI is working…"}</>:<><Sparkles size={17}/>{zh?"立即体验":"Watch AI Work"}<ArrowRight size={16}/></>}</button>
         <p className="lab-note"><span>✦</span>{zh?"这是模拟体验，不会保存或发送任何数据。":"Interactive demo only. No data is saved or sent."}</p>
       </form>
       <div className={`lab-results ${step<0?'is-empty':''}`} aria-live="polite">
         {step<0?<div className="lab-empty"><div><Sparkles/></div><h3>{zh?"AI 已准备就绪":"AI is ready"}</h3><p>{zh?"输入客户咨询并点击“立即体验”，观看完整流程。":"Paste a message and click Watch AI Work to see the full workflow."}</p><div className="empty-lines"><i/><i/><i/></div></div>:<>
-          <div className="result-head"><div><span className={running?"processing":"complete"}>{running?<LoaderCircle size={12}/>:<Check size={12}/>} {running?(zh?"AI 正在工作":"AI WORKING"):(zh?"流程完成":"WORKFLOW COMPLETE")}</span><h3>{zh?"实时工作流":"Live workflow"}</h3></div><span className="result-time">00:{String(Math.min(step+1,8)).padStart(2,"0")}</span></div>
+          <div className="result-head"><div><span className={running?"processing":"complete"}>{running?<LoaderCircle size={12}/>:<Check size={12}/>} {running?(zh?"AI 正在工作":"AI WORKING"):(zh?"流程完成":"WORKFLOW COMPLETE")}</span><h3>{zh?"实时工作流":"Live workflow"}</h3></div><span className="result-time">00:{String(Math.min(step+1,milestones.length)).padStart(2,"0")}</span></div>
           <div className="workflow-track">{milestones.map((item,i)=>{const Icon=item.icon;const active=i<=step;return <motion.div className={`workflow-row ${active?'active':''}`} initial={{opacity:.25}} animate={{opacity:active?1:.25,x:i===step?[0,3,0]:0}} transition={{duration:.35}} key={item.label}><span className="workflow-icon">{active&&i<step?<Check size={14}/>:i===step&&running?<LoaderCircle className="lab-spinner" size={14}/>:<Icon size={14}/>}</span><p>{item.label}</p>{i<step&&<small>{zh?"完成":"Done"}</small>}</motion.div>})}</div>
-          <AnimatePresence>{step>=2&&<motion.div className="result-summary" initial={{opacity:0,y:12}} animate={{opacity:1,y:0}}><div className="score-card"><span>{zh?"线索评分":"LEAD SCORE"}</span><strong>92<small>/100</small></strong><div className="score-bar"><i/></div></div>{step>=3&&<motion.div className="priority-card" initial={{opacity:0,x:8}} animate={{opacity:1,x:0}}><span>{zh?"优先级":"PRIORITY"}</span><strong><i/>{zh?"高优先级":"High priority"}</strong><small>{zh?"建议 5 分钟内跟进":"Follow up within 5 min"}</small></motion.div>}</motion.div>}</AnimatePresence>
-          <AnimatePresence>{step>=4&&<motion.div className="reply-card" initial={{opacity:0,y:12}} animate={{opacity:1,y:0}}><span><MessageSquareText size={13}/>{zh?"建议回复":"SUGGESTED REPLY"}</span><p>{zh?"您好！感谢您的咨询。我们很乐意向您介绍适合您需求的服务和报价。方便告诉我您的团队规模和主要目标吗？":"Hi! Thanks for reaching out. I’d be happy to walk you through our services and pricing. Could you share a little about your team and what you’d like to achieve?"}</p><small>{zh?"语气：专业、友好":"Tone: Professional · Friendly"}</small></motion.div>}</AnimatePresence>
-          {step===8&&<motion.div className="result-success" initial={{opacity:0,scale:.98}} animate={{opacity:1,scale:1}}><span><Check size={14}/></span><p><b>{zh?"工作流程完成":"Workflow complete"}</b><small>{zh?"CRM 已创建 · 邮件已生成 · 销售已通知":"CRM created · Email generated · Sales notified"}</small></p><button type="button" onClick={reset}>{zh?"再试一次":"Try again"}</button></motion.div>}
+          <AnimatePresence>{step>=1&&<motion.div className={`result-summary intent-${selection.level}`} initial={{opacity:0,y:12}} animate={{opacity:1,y:0}}><div className="score-card"><span>{zh?"线索评分":"LEAD SCORE"}</span><strong>{selection.score}<small>/100</small></strong><div className="score-bar"><i style={{width:`${selection.score}%`}}/></div></div><motion.div className="priority-card" initial={{opacity:0,x:8}} animate={{opacity:1,x:0}}><span>{zh?"优先级":"PRIORITY"}</span><strong><i/>{priority}</strong><small>{selection.level==="high"?(zh?"建议 5 分钟内跟进":"Follow up within 5 min"):(zh?"AI 自动处理并记录":"AI handling and logging")}</small></motion.div></motion.div>}</AnimatePresence>
+          {step===milestones.length&&<motion.div className={`result-success intent-${selection.level}`} initial={{opacity:0,scale:.98}} animate={{opacity:1,scale:1}}><span><Check size={14}/></span><p><b>{zh?"工作流程完成":"Workflow complete"}</b><small>{milestones.slice(2).map(item=>item.label.replace("…","")).join(" · ")}</small></p><button type="button" onClick={reset}>{zh?"再试一次":"Try again"}</button></motion.div>}
         </>}
       </div>
     </div>
