@@ -6,6 +6,16 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; background: #fff; }
 body { margin: 0; color: #1d1d1f; background: #fff; -webkit-font-smoothing: antialiased; }
+html[lang="zh-CN"] body { font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif; font-weight: 400; letter-spacing: 0; font-synthesis: none; }
+html[lang="zh-CN"] :where(h1,h2,h3,p,span,a,button) { font-feature-settings: "kern" 1, "palt" 1; }
+html[lang="zh-CN"] :where(h1,h2,h3) { hanging-punctuation: first last; }
+html[lang="zh-CN"] .eyebrow { letter-spacing: .08em; text-transform: none; font-weight: 600; }
+html[lang="zh-CN"] .section-title { line-height: 1.12; letter-spacing: -.035em; font-weight: 600; }
+html[lang="zh-CN"] .section-copy { line-height: 1.85; letter-spacing: .01em; }
+html[lang="zh-CN"] main h1 { line-height: 1.08; letter-spacing: -.04em; font-weight: 600; }
+html[lang="zh-CN"] .feature-copy h3 { line-height: 1.18; letter-spacing: -.025em; }
+html[lang="zh-CN"] .problem-card p, html[lang="zh-CN"] .step-card p, html[lang="zh-CN"] .product-description, html[lang="zh-CN"] .faq-item > p { line-height: 1.8; }
+html[lang="zh-CN"] .cta-primary, html[lang="zh-CN"] .cta-secondary, html[lang="zh-CN"] .cta-white { font-weight: 600; letter-spacing: .01em; }
 a { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 2px solid #0071e3; outline-offset: 4px; }
 .skip-link { position: fixed; z-index: 100; top: 12px; left: 12px; transform: translateY(-160%); border-radius: 999px; background: #1d1d1f; padding: 12px 18px; color: #fff; font-size: 14px; font-weight: 600; transition: transform 180ms ease; }
