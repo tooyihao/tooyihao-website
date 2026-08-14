@@ -6,20 +6,22 @@ import { useI18n } from "@/i18n/provider";
 
 export function LiveAICanvas(){
   const {locale}=useI18n(); const zh=locale==="zh"; const [elapsed,setElapsed]=useState(0);
-  useEffect(()=>{const started=performance.now();const timer=window.setInterval(()=>setElapsed((performance.now()-started)%13800),50);return()=>window.clearInterval(timer)},[]);
-  const t=elapsed, score=t<3000?12:t<3400?35:t<3800?57:t<4200?79:94, priority=t<3400?(zh?"低":"Low"):t<4200?(zh?"中":"Medium"):(zh?"高":"High");
-  const reply=zh?"您好！感谢您的咨询。我们的方案会根据团队规模和需求定制。我很乐意为您介绍价格选项。":"Hi! Thanks for reaching out. Our plans are tailored to your team and goals. I’d be happy to walk you through the pricing options.";
-  const typed=reply.slice(0,Math.max(0,Math.floor((t-7200)/22))), done=(at:number)=>t>=at, working=(from:number,to:number)=>t>=from&&t<to;
-  return <div className={`ai-canvas ${t>=11200&&t<13200?'is-complete':''} ${t>=13200?'is-resetting':''}`} aria-label={zh?"实时 AI 工作流程演示":"Live AI workflow demonstration"}>
+  useEffect(()=>{const started=performance.now();const timer=window.setInterval(()=>setElapsed((performance.now()-started)%8200),40);return()=>window.clearInterval(timer)},[]);
+  const t=elapsed;
+  const score=t<3000?0:Math.min(94,Math.round((t-3000)/1700*94));
+  return <div className={`ai-canvas ${t>=7100?'is-resetting':''}`} aria-label={zh?"AI 分析客户消息并识别高优先级线索":"AI analyzes a customer message and identifies a high-priority lead"}>
     <div className="canvas-top"><div><span className="canvas-logo"><Sparkles size={14}/></span><b>AI LeadFlow</b></div><span className="canvas-live"><i/>{zh?"实时运行":"LIVE"}</span></div>
-    <div className="canvas-content"><div className="canvas-message"><span><MessageSquareText size={13}/>{zh?"新客户咨询":"INCOMING MESSAGE"}</span><p>{zh?<>你好，<br/>我想了解你们的价格。</>:<>Hi,<br/>I&apos;d like to know your pricing.</>}</p><small>Sarah Chen · Acme Studio <em>{zh?"刚刚":"Just now"}</em></small></div>
-      <div className="canvas-engine"><div className="engine-head"><div className={t<2600?"thinking":""}><Sparkles size={15}/></div><p><b>{working(1000,1900)?(zh?"正在读取消息…":"Reading message..."):working(1900,2800)?(zh?"正在分析客户…":"Analyzing customer..."):(zh?"AI 工作流":"AI workflow")}</b><small>{zh?"自主执行中":"Working autonomously"}</small></p></div>
-        <div className="engine-grid"><div className={`canvas-score ${done(2800)?'visible':''}`}><span>{zh?"线索评分":"LEAD SCORE"}</span><strong>{score}</strong><div><i style={{width:`${score}%`}}/></div><small className="priority">{priority} {zh?"优先级":"priority"}</small></div>
-          <div className={`canvas-tasks ${done(4500)?'visible':''}`}><span><Database size={12}/>{zh?"CRM 实时同步":"CRM · LIVE SYNC"}</span>{[["Creating Contact...",5000],["Assigning Sales Owner...",5700],["Updating Pipeline...",6400]].map(([label,at])=><p key={label as string}>{zh?({"Creating Contact...":"正在创建联系人…","Assigning Sales Owner...":"正在分配销售负责人…","Updating Pipeline...":"正在更新管道…"}[label as string]):label}{done(at as number)?<Check size={13}/>:<LoaderCircle className="lab-spinner" size={13}/>}</p>)}</div></div>
-        <div className={`canvas-reply ${done(7100)?'visible':''}`}><span><Sparkles size={12}/>{zh?"AI 生成回复":"AI GENERATED REPLY"}</span><p>{typed}<i/></p><small className={done(10100)?"sent":""}>{done(10100)?<><Check size={12}/>{zh?"邮件已发送":"Email sent"}</>:<>{zh?"正在撰写…":"Writing naturally..."}</>}</small></div>
-        <div className={`canvas-notification ${done(10600)?'visible':''}`}><span><Bell size={14}/></span><p><b>{zh?"高意向客户":"High-intent lead"}</b><small>{zh?"Sarah 的评分达到 94，销售已通知。":"Sarah reached 94. Sales has been notified."}</small></p><Check size={14}/></div>
-      </div><div className="canvas-complete"><div className="complete-check"><Check size={22}/></div><p className="complete-title">{zh?"工作完成":"Work complete"}</p><div className="complete-list"><span><Check/> {zh?"CRM 已更新":"CRM Updated"}</span><span><Check/> {zh?"邮件已发送":"Email Sent"}</span><span><Check/> {zh?"销售已通知":"Sales Notified"}</span></div><div className="complete-time"><small>{zh?"完成用时":"Completed in"}</small><strong>11.2s</strong></div><p className="complete-caption">{zh?<>竞争对手还在回复时，<br/>AI 已经完成了。</>:<>While your competitors<br/>are still typing.</>}</p></div></div>
-    <div className="canvas-progress"><i style={{width:`${Math.min(t/11200*100,100)}%`}}/></div>
+    <div className="canvas-content">
+      <div className="teaser-flow">
+        <div className="canvas-message"><span><MessageSquareText size={13}/>{zh?"客户消息":"CUSTOMER MESSAGE"}</span><p>{zh?"你好，我想了解你们的价格。":"Hi, I’d like to know your pricing."}</p><small>Sarah Chen · Acme Studio <em>{zh?"刚刚":"Just now"}</em></small></div>
+        <span className={`teaser-arrow ${t>=1300?'visible':''}`} aria-hidden="true">↓</span>
+        <div className={`teaser-thinking ${t>=1500?'visible':''}`}><span><Sparkles size={17}/></span><p><b>{zh?"AI 思考中…":"AI Thinking..."}</b><small>{zh?"正在识别购买意向":"Reading buying intent"}</small></p><i/><i/><i/></div>
+        <span className={`teaser-arrow ${t>=2750?'visible':''}`} aria-hidden="true">↓</span>
+        <div className={`teaser-score ${t>=2900?'visible':''}`}><span>{zh?"线索评分":"LEAD SCORE"}</span><strong>{score}</strong><div><i style={{width:`${score}%`}}/></div></div>
+        <span className={`teaser-arrow ${t>=4750?'visible':''}`} aria-hidden="true">↓</span>
+        <div className={`teaser-priority ${t>=4900?'visible':''}`}><i/><span>{zh?"高优先级":"High Priority"}</span></div>
+      </div>
+    </div>
   </div>
 }
 
