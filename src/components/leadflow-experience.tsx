@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, BarChart3, Bell, Check, ChevronDown, CirclePlay, Database, LayoutDashboard, LoaderCircle, MessageSquareText, Search, Send, Settings, Sparkles, Users, Zap } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BarChart3, Bell, Check, ChevronDown, CirclePlay, Clock3, Database, LayoutDashboard, LoaderCircle, MessageSquareText, Search, Send, Settings, Sparkles, Users, X, Zap } from "lucide-react";
 import { useI18n } from "@/i18n/provider";
 
 export function LiveAICanvas(){
@@ -79,7 +79,38 @@ export function LiveDemo(){
   </div>
 }
 
-export function ProductVideo(){const {locale}=useI18n();const zh=locale==="zh";const [playing,setPlaying]=useState(false);return <button aria-label={zh?"播放 AI LeadFlow 产品介绍":"Play AI LeadFlow product overview"} onClick={()=>setPlaying(!playing)} className={`video-stage ${playing?'playing':''}`}><div className="video-grid"/><div className="video-ui"><div className="video-side"/><div className="video-chart"><span>Qualified pipeline</span><strong>$284,000</strong><div className="chart-bars">{[30,45,38,58,65,61,82,94].map((h,i)=><i style={{height:`${h}%`}} key={i}/>)}</div></div><div className="video-leads">{['Sarah Chen · 94','Marcus Reid · 81','Elena Rossi · 76'].map(x=><p key={x}>{x}<Check size={13}/></p>)}</div></div><div className="video-overlay"><span className="play-button">{playing?<span className="pause">Ⅱ</span>:<CirclePlay/>}</span><p>{playing?(zh?'正在播放产品介绍':'Product tour playing'):(zh?'看看 AI LeadFlow 如何工作':'See AI LeadFlow in action')}</p><small>1:30</small></div></button>}
+const demoScenes=[
+  {duration:10000,title:"A new opportunity arrives",caption:"Every great customer journey starts with a single message."},
+  {duration:10000,title:"But slow replies lose momentum",caption:"When a lead waits, intent fades with every passing minute."},
+  {duration:11000,title:"LeadFlow responds in seconds",caption:"A helpful, on-brand answer is sent instantly — day or night."},
+  {duration:11000,title:"Intent becomes a clear signal",caption:"LeadFlow scores buying intent so your team knows who needs attention."},
+  {duration:12000,title:"The entire workflow moves",caption:"CRM, routing, follow-up and notifications happen automatically."},
+  {duration:12000,title:"Results appear in one view",caption:"Your team gets a live, focused view of every qualified opportunity."},
+  {duration:12000,title:"From reactive to ready",caption:"Less waiting and manual work. More conversations that can convert."},
+  {duration:12000,title:"Turn every response into momentum",caption:"See what AI LeadFlow can do for your pipeline."},
+] as const;
+const demoTotal=demoScenes.reduce((total,scene)=>total+scene.duration,0);
+
+function DemoVisual({scene}:{scene:number}){
+  switch(scene){
+    case 1:return <div className="movie-timer"><Clock3/><strong>05:14</strong><span>Average response time</span><div><i/><i/><i/><i/></div><p><Bell size={14}/> Lead waiting for a reply</p></div>;
+    case 2:return <div className="movie-reply"><span><Sparkles size={15}/> AI REPLY · SENT IN 8 SEC</span><p>Hi Sarah! Thanks for reaching out. Our plans are tailored to your team and goals. I&apos;d be happy to help with pricing.</p><small><Check size={14}/> Delivered just now</small></div>;
+    case 3:return <div className="movie-score"><span>LEAD INTENT SCORE</span><strong>94<small>/100</small></strong><div><i/></div><p><Zap size={15}/> High priority · Ready for sales</p></div>;
+    case 4:return <div className="movie-workflow">{[[MessageSquareText,"Message understood"],[Sparkles,"Lead qualified"],[Database,"CRM updated"],[Send,"Follow-up sent"],[Bell,"Sales notified"]].map(([Icon,label],i)=>{const I=Icon as typeof Sparkles;return <div style={{"--delay":`${i*.18}s`} as React.CSSProperties} key={label as string}><span><I size={17}/></span><p>{label as string}<small>Complete</small></p><Check size={15}/></div>})}</div>;
+    case 5:return <div className="movie-dashboard"><div className="movie-metrics"><p><span>Qualified leads</span><strong>184</strong><small>+24%</small></p><p><span>Meetings booked</span><strong>68</strong><small>+18%</small></p><p><span>Response time</span><strong>18 sec</strong><small>−42%</small></p></div><div className="movie-chart"><span>QUALIFIED PIPELINE</span><strong>$284,000</strong><div>{[34,48,43,62,58,78,91].map((height,i)=><i style={{height:`${height}%`}} key={i}/>)}</div></div></div>;
+    case 6:return <div className="movie-compare"><section><span>BEFORE</span><strong>5+ hours</strong><p>Slow replies</p><p>Manual follow-up</p><p>Hidden intent</p></section><ArrowRight/><section><span>WITH LEADFLOW</span><strong>18 seconds</strong><p><Check/> Instant response</p><p><Check/> Automatic workflow</p><p><Check/> Clear priorities</p></section></div>;
+    case 7:return <div className="movie-cta"><span><Sparkles/></span><h3>Never let a great lead go cold.</h3><p>AI LeadFlow</p><button tabIndex={-1}>Book your free demo <ArrowRight/></button></div>;
+    case 0:
+    default:return <div className="movie-message"><span><MessageSquareText size={15}/> NEW CUSTOMER MESSAGE</span><p>Hi, I&apos;d like to know your pricing.</p><small><b>SC</b> Sarah Chen · Acme Studio <em>Just now</em></small></div>;
+  }
+}
+
+export function ProductVideo(){
+  const {locale}=useI18n();const zh=locale==="zh";const [open,setOpen]=useState(false);const [elapsed,setElapsed]=useState(0);
+  useEffect(()=>{if(!open){setElapsed(0);return}const started=performance.now();const timer=window.setInterval(()=>setElapsed(Math.min(performance.now()-started,demoTotal-1)),100);return()=>window.clearInterval(timer)},[open]);
+  useEffect(()=>{if(!open)return;const close=(event:KeyboardEvent)=>{if(event.key==="Escape")setOpen(false)};document.body.style.overflow="hidden";window.addEventListener("keydown",close);return()=>{document.body.style.overflow="";window.removeEventListener("keydown",close)}},[open]);
+  let passed=0;let resolved=0;for(let i=0;i<demoScenes.length;i++){if(elapsed>=passed)resolved=i;passed+=demoScenes[i].duration;if(elapsed<passed)break}const sceneIndex=resolved>=0&&resolved<demoScenes.length?resolved:0;const activeScene=demoScenes[sceneIndex]??demoScenes[0];const sceneStart=demoScenes.slice(0,sceneIndex).reduce((sum,scene)=>sum+scene.duration,0);const progress=Math.min(100,Math.max(0,(elapsed/demoTotal)*100));
+  return <><button aria-label={zh?"播放 AI LeadFlow 产品介绍":"Watch Product Demo"} onClick={()=>setOpen(true)} className="video-stage"><div className="video-grid"/><div className="video-ui"><div className="video-side"/><div className="video-chart"><span>Qualified pipeline</span><strong>$284,000</strong><div className="chart-bars">{[30,45,38,58,65,61,82,94].map((h,i)=><i style={{height:`${h}%`}} key={i}/>)}</div></div><div className="video-leads">{['Sarah Chen · 94','Marcus Reid · 81','Elena Rossi · 76'].map(x=><p key={x}>{x}<Check size={13}/></p>)}</div></div><div className="video-overlay"><span className="play-button"><CirclePlay/></span><p>{zh?'观看产品演示':'Watch Product Demo'}</p><small>1:30</small></div></button>{open&&<div className="demo-modal" role="dialog" aria-modal="true" aria-label="AI LeadFlow 90-second product demo"><button className="demo-close" onClick={()=>setOpen(false)} aria-label="Close product demo"><X/></button><div className="demo-movie"><div className="movie-glow"/><header><span><Sparkles/> AI LEADFLOW</span><small>90-SECOND PRODUCT DEMO</small></header><main key={sceneIndex}><div className="movie-copy"><span>0{sceneIndex+1} / 08</span><h2>{activeScene.title}</h2><p>{activeScene.caption}</p></div><div className="movie-visual"><DemoVisual scene={sceneIndex}/></div></main><footer><div className="movie-timeline" aria-label={`Demo progress ${Math.round(progress)} percent`}>{demoScenes.map((scene,i)=>{const local=i<sceneIndex?100:i===sceneIndex?Math.min(100,((elapsed-sceneStart)/scene.duration)*100):0;return <span className={i<=sceneIndex?"active":""} key={scene.title}><i style={{width:`${local}%`}}/></span>})}</div><div><span>{activeScene.title}</span><small>{Math.floor(elapsed/60000)}:{String(Math.floor(elapsed/1000)%60).padStart(2,"0")} / 1:30</small></div></footer></div></div>}</>}
 
 const faqsEn=[['Will this replace my sales team?','No. LeadFlow removes repetitive qualification and follow-up so your team can spend more time on conversations that require a human.'],['Does it work with our existing CRM?','Yes. LeadFlow is designed to connect with modern CRMs, forms, calendars and email tools. We map the integration during onboarding.'],['How quickly can we launch?','Most teams can launch an initial workflow in days, depending on integrations and qualification complexity.'],['Will the AI sound like our brand?','Yes. We configure tone, messaging, guardrails and escalation rules around your brand and sales process.'],['How is pricing determined?','Pricing reflects lead volume, integrations and workflow complexity. Book a demo and we’ll provide a clear, tailored quote.']];
 const faqsZh=[['会取代销售团队吗','不会 LeadFlow 接手重复的识别和跟进 让销售专注判断 关系和成交'],['现有 CRM 还能继续用吗','当然 主流 CRM 表单 日历和邮件工具都可接入 上线前我们会一起完成配置'],['多久能够上线','多数团队几天即可启用首个流程 实际时间取决于接入范围和意向规则'],['说话方式像我们的品牌吗','会 我们将品牌语气 销售话术 服务边界和人工接管规则逐一配置'],['如何确定方案','根据线索量 接入范围和流程复杂度灵活设计 演示后你会收到一份清晰方案']];
