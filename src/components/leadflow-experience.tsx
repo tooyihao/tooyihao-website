@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, BarChart3, Bell, Check, ChevronDown, CirclePlay, Database, LayoutDashboard, LoaderCircle, MessageSquareText, Search, Send, Settings, Sparkles, Users, Zap } from "lucide-react";
 import { useI18n } from "@/i18n/provider";
@@ -79,7 +79,49 @@ export function LiveDemo(){
   </div>
 }
 
-export function ProductVideo(){const {locale}=useI18n();const zh=locale==="zh";const [playing,setPlaying]=useState(false);return <button aria-label={zh?"播放 AI LeadFlow 产品介绍":"Play AI LeadFlow product overview"} onClick={()=>setPlaying(!playing)} className={`video-stage ${playing?'playing':''}`}><div className="video-grid"/><div className="video-ui"><div className="video-side"/><div className="video-chart"><span>Qualified pipeline</span><strong>$284,000</strong><div className="chart-bars">{[30,45,38,58,65,61,82,94].map((h,i)=><i style={{height:`${h}%`}} key={i}/>)}</div></div><div className="video-leads">{['Sarah Chen · 94','Marcus Reid · 81','Elena Rossi · 76'].map(x=><p key={x}>{x}<Check size={13}/></p>)}</div></div><div className="video-overlay"><span className="play-button">{playing?<span className="pause">Ⅱ</span>:<CirclePlay/>}</span><p>{playing?(zh?'正在播放产品介绍':'Product tour playing'):(zh?'看看 AI LeadFlow 如何工作':'See AI LeadFlow in action')}</p><small>1:30</small></div></button>}
+const narration={
+  zh:"当客户表达兴趣时，AI LeadFlow 会立即回应，识别购买意向并完成线索评分。它会自动更新客户关系管理系统，生成个性化跟进内容，并把高意向机会及时通知销售团队。更快回应，更少流失，让团队专注于真正重要的成交对话。",
+  en:"When a customer shows interest, AI LeadFlow responds immediately, identifies buying intent, and scores the lead. It updates your CRM, creates personalized follow-up, and alerts your sales team to high-intent opportunities, so your team can focus on the conversations that close deals."
+};
+
+export function ProductVideo(){
+  const {locale}=useI18n();const zh=locale==="zh";
+  const [playing,setPlaying]=useState(false);const [played,setPlayed]=useState(false);const [speechError,setSpeechError]=useState(false);const [voices,setVoices]=useState<SpeechSynthesisVoice[]>([]);
+  useEffect(()=>{
+    if (!("speechSynthesis" in window))return;
+    const loadVoices=()=>setVoices(window.speechSynthesis.getVoices());
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged=loadVoices;
+    return()=>{window.speechSynthesis.onvoiceschanged=null};
+  },[]);
+  const speak=useCallback(()=>{
+    setSpeechError(false);
+    if (!("speechSynthesis" in window)||!("SpeechSynthesisUtterance" in window)){setPlaying(false);setSpeechError(true);return}
+    window.speechSynthesis.cancel();
+    const utterance=new SpeechSynthesisUtterance(zh?narration.zh:narration.en);
+    const available=window.speechSynthesis.getVoices().length?window.speechSynthesis.getVoices():voices;
+    if(zh){
+      const chineseVoice=available.find(v=>v.lang==="zh-CN")??available.find(v=>v.lang.startsWith("zh"))??available.find(v=>v.name.includes("Chinese"))??available.find(v=>v.name.includes("Mandarin"))??available.find(v=>v.name.includes("普通话"))??available.find(v=>v.name.includes("中文"));
+      if(chineseVoice)utterance.voice=chineseVoice;
+      utterance.lang="zh-CN";utterance.rate=.85;utterance.pitch=1;utterance.volume=1;
+    }else{
+      const englishVoice=available.find(v=>v.lang==="en-US")??available.find(v=>v.lang.startsWith("en"));
+      if(englishVoice)utterance.voice=englishVoice;
+      utterance.lang="en-US";
+    }
+    utterance.onstart=()=>setPlaying(true);
+    utterance.onend=()=>{setPlaying(false);setPlayed(true)};
+    utterance.onerror=event=>{setPlaying(false);if(event.error!=="canceled"&&event.error!=="interrupted")setSpeechError(true)};
+    setPlaying(true);
+    window.speechSynthesis.speak(utterance);
+  },[zh,voices]);
+  useEffect(()=>{
+    const startNarration=()=>speak();
+    window.addEventListener("leadflow:narrate",startNarration);
+    return()=>{window.removeEventListener("leadflow:narrate",startNarration);window.speechSynthesis?.cancel()};
+  },[speak]);
+  return <><button aria-label={zh?"播放 AI LeadFlow 中文旁白":"Play AI LeadFlow product overview narration"} onClick={speak} className={`video-stage ${playing?'playing':''}`}><div className="video-grid"/><div className="video-ui"><div className="video-side"/><div className="video-chart"><span>Qualified pipeline</span><strong>$284,000</strong><div className="chart-bars">{[30,45,38,58,65,61,82,94].map((h,i)=><i style={{height:`${h}%`}} key={i}/>)}</div></div><div className="video-leads">{['Sarah Chen · 94','Marcus Reid · 81','Elena Rossi · 76'].map(x=><p key={x}>{x}<Check size={13}/></p>)}</div></div><div className="video-overlay"><span className="play-button">{playing?<span className="pause">Ⅱ</span>:<CirclePlay/>}</span><p>{playing?(zh?'正在播放中文旁白':'Product tour playing'):played?'Replay':(zh?'开启旁白':'Enable narration')}</p><small>1:30</small></div></button>{speechError&&<p role="alert" className="mt-3 text-center text-sm text-muted">{zh?"当前浏览器无法播放中文旁白，请查看字幕。":"Narration could not be played. Please follow the captions."}</p>}</>
+}
 
 const faqsEn=[['Will this replace my sales team?','No. LeadFlow removes repetitive qualification and follow-up so your team can spend more time on conversations that require a human.'],['Does it work with our existing CRM?','Yes. LeadFlow is designed to connect with modern CRMs, forms, calendars and email tools. We map the integration during onboarding.'],['How quickly can we launch?','Most teams can launch an initial workflow in days, depending on integrations and qualification complexity.'],['Will the AI sound like our brand?','Yes. We configure tone, messaging, guardrails and escalation rules around your brand and sales process.'],['How is pricing determined?','Pricing reflects lead volume, integrations and workflow complexity. Book a demo and we’ll provide a clear, tailored quote.']];
 const faqsZh=[['会取代销售团队吗','不会 LeadFlow 接手重复的识别和跟进 让销售专注判断 关系和成交'],['现有 CRM 还能继续用吗','当然 主流 CRM 表单 日历和邮件工具都可接入 上线前我们会一起完成配置'],['多久能够上线','多数团队几天即可启用首个流程 实际时间取决于接入范围和意向规则'],['说话方式像我们的品牌吗','会 我们将品牌语气 销售话术 服务边界和人工接管规则逐一配置'],['如何确定方案','根据线索量 接入范围和流程复杂度灵活设计 演示后你会收到一份清晰方案']];
