@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, BarChart3, Bell, Check, ChevronDown, CirclePlay, Database, LayoutDashboard, LoaderCircle, MessageSquareText, Search, Send, Settings, Sparkles, Users, Zap } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BarChart3, Bell, Captions, Check, ChevronDown, CirclePlay, Database, LayoutDashboard, LoaderCircle, MessageSquareText, Pause, Play, Search, Send, Settings, Sparkles, Users, Volume2, VolumeX, X, Zap } from "lucide-react";
 import { useI18n } from "@/i18n/provider";
 
 export function LiveAICanvas(){
@@ -79,7 +79,47 @@ export function LiveDemo(){
   </div>
 }
 
-export function ProductVideo(){const {locale}=useI18n();const zh=locale==="zh";const [playing,setPlaying]=useState(false);return <button aria-label={zh?"播放 AI LeadFlow 产品介绍":"Play AI LeadFlow product overview"} onClick={()=>setPlaying(!playing)} className={`video-stage ${playing?'playing':''}`}><div className="video-grid"/><div className="video-ui"><div className="video-side"/><div className="video-chart"><span>Qualified pipeline</span><strong>$284,000</strong><div className="chart-bars">{[30,45,38,58,65,61,82,94].map((h,i)=><i style={{height:`${h}%`}} key={i}/>)}</div></div><div className="video-leads">{['Sarah Chen · 94','Marcus Reid · 81','Elena Rossi · 76'].map(x=><p key={x}>{x}<Check size={13}/></p>)}</div></div><div className="video-overlay"><span className="play-button">{playing?<span className="pause">Ⅱ</span>:<CirclePlay/>}</span><p>{playing?(zh?'正在播放产品介绍':'Product tour playing'):(zh?'看看 AI LeadFlow 如何工作':'See AI LeadFlow in action')}</p><small>1:30</small></div></button>}
+const filmScenes=[
+  {en:"Every lead begins with a moment of intent.",zh:"每一条线索，都始于一个心动的瞬间。",title:"A new inquiry",titleZh:"新的客户咨询"},
+  {en:"LeadFlow responds instantly — while interest is still high.",zh:"趁意向正浓，LeadFlow 即刻回应。",title:"Response in seconds",titleZh:"几秒内完成回应"},
+  {en:"It reads the conversation, detects intent and scores every opportunity.",zh:"读懂对话，识别意向，为每个机会智能评分。",title:"Intent detected",titleZh:"意向已识别"},
+  {en:"The right context flows into your CRM automatically.",zh:"完整信息自动同步到你的 CRM。",title:"Pipeline updated",titleZh:"销售管道已更新"},
+  {en:"Personal follow-up keeps every promising conversation moving.",zh:"个性化跟进，让每个好机会持续向前。",title:"Follow-up sent",titleZh:"跟进已发送"},
+  {en:"Your team arrives at the moment that matters — ready to close.",zh:"关键时刻交给团队，带着完整背景走向成交。",title:"Ready for sales",titleZh:"销售已准备就绪"},
+];
+
+export function ProductVideo(){
+  const {locale}=useI18n(); const zh=locale==="zh";
+  const [open,setOpen]=useState(false),[playing,setPlaying]=useState(false),[seconds,setSeconds]=useState(0),[captions,setCaptions]=useState(true),[sound,setSound]=useState(true);
+  const spoken=useRef(-1); const scene=Math.min(5,Math.floor(seconds/15));
+  const close=()=>{setOpen(false);setPlaying(false);window.speechSynthesis?.cancel()};
+  const launch=()=>{setSeconds(0);spoken.current=-1;setOpen(true);setPlaying(true)};
+  useEffect(()=>{const handler=()=>launch();window.addEventListener("open-leadflow-film",handler);return()=>window.removeEventListener("open-leadflow-film",handler)},[]);
+  useEffect(()=>{if(!open)return;document.body.style.overflow="hidden";const key=(e:KeyboardEvent)=>{if(e.key==="Escape")close()};window.addEventListener("keydown",key);return()=>{document.body.style.overflow="";window.removeEventListener("keydown",key)}},[open]);
+  useEffect(()=>{if(!playing)return;const timer=window.setInterval(()=>setSeconds(s=>{if(s>=89.9){setPlaying(false);return 90}return s+.1}),100);return()=>window.clearInterval(timer)},[playing]);
+  useEffect(()=>{if(!open||!playing||zh||!sound||spoken.current===scene||!("speechSynthesis" in window))return;spoken.current=scene;window.speechSynthesis.cancel();const line=new SpeechSynthesisUtterance(filmScenes[scene].en);line.lang="en-US";line.rate=.92;window.speechSynthesis.speak(line)},[scene,open,playing,zh,sound]);
+  const seek=(value:number)=>{setSeconds(value);spoken.current=-1};
+  return <>
+    <button aria-label={zh?"播放 AI LeadFlow 产品介绍":"Play AI LeadFlow product overview"} onClick={launch} className="video-stage"><div className="video-grid"/><div className="video-ui"><div className="video-side"/><div className="video-chart"><span>Qualified pipeline</span><strong>$284,000</strong><div className="chart-bars">{[30,45,38,58,65,61,82,94].map((h,i)=><i style={{height:`${h}%`}} key={i}/>)}</div></div><div className="video-leads">{['Sarah Chen · 94','Marcus Reid · 81','Elena Rossi · 76'].map(x=><p key={x}>{x}<Check size={13}/></p>)}</div></div><div className="video-overlay"><span className="play-button"><CirclePlay/></span><p>{zh?'看看 AI LeadFlow 如何工作':'See AI LeadFlow in action'}</p><small>1:30</small></div></button>
+    <AnimatePresence>{open&&<motion.div className="film-modal" role="dialog" aria-modal="true" aria-label={zh?"90 秒产品介绍":"90-second product demo"} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onMouseDown={e=>{if(e.target===e.currentTarget)close()}}><motion.div className="film-shell" initial={{opacity:0,scale:.96,y:20}} animate={{opacity:1,scale:1,y:0}} exit={{opacity:0,scale:.97}}>
+      <button className="film-close" onClick={close} aria-label={zh?"关闭介绍":"Close demo"}><X/></button>
+      <div className={`film-screen scene-${scene}`}>
+        <div className="film-aurora"/><div className="film-grain"/><div className="film-brand"><Sparkles/> AI LeadFlow <span>{String(scene+1).padStart(2,"0")} / 06</span></div>
+        <AnimatePresence mode="wait"><motion.div className="film-scene" key={scene} initial={{opacity:0,scale:1.035}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:.985}} transition={{duration:.8}}>
+          {scene===0&&<><div className="film-phone"><small>NEW MESSAGE · JUST NOW</small><p>Hi, I&apos;d like to know your pricing.</p><span>Sarah Chen · Acme Studio</span></div><div className="film-ripple"/></>}
+          {scene===1&&<div className="film-conversation"><p>Hi Sarah — great to meet you.</p><p>What are you hoping to improve?</p><i><Sparkles/> Reply generated in 1.8 sec</i></div>}
+          {scene===2&&<div className="film-score"><small>LIVE INTENT SCORE</small><strong>94</strong><span>HIGH PRIORITY</span><div><i/></div></div>}
+          {scene===3&&<div className="film-pipeline">{["New lead","Qualified","Sales ready"].map((x,i)=><div key={x}><small>{x}</small>{i===2&&<p>Sarah Chen <b>94</b></p>}</div>)}</div>}
+          {scene===4&&<div className="film-email"><small>PERSONAL FOLLOW-UP</small><h3>Here&apos;s the right plan for Acme Studio</h3><p>Built from the conversation. On-brand. Sent at exactly the right moment.</p><span><Check/> Email sent</span></div>}
+          {scene===5&&<div className="film-outcome"><span><Check/></span><strong>11.2s</strong><p>{zh?"从咨询到销售就绪":"From inquiry to sales-ready"}</p><div><b>CRM updated</b><b>Follow-up sent</b><b>Sales notified</b></div></div>}
+          <div className="film-title"><small>{zh?"AI 驱动的销售流程":"THE INTELLIGENT PIPELINE"}</small><h2>{zh?filmScenes[scene].titleZh:filmScenes[scene].title}</h2></div>
+        </motion.div></AnimatePresence>
+        {captions&&<div className="film-caption">{zh?filmScenes[scene].zh:filmScenes[scene].en}</div>}
+      </div>
+      <div className="film-controls"><button onClick={()=>setPlaying(p=>!p)} aria-label={playing?(zh?"暂停":"Pause"):(zh?"播放":"Play")}>{playing?<Pause/>:<Play/>}</button><span>{Math.floor(seconds/60)}:{String(Math.floor(seconds%60)).padStart(2,"0")}</span><input aria-label={zh?"视频进度":"Demo progress"} type="range" min="0" max="90" step=".1" value={seconds} onChange={e=>seek(Number(e.target.value))}/><span>1:30</span><button className={captions?"active":""} onClick={()=>setCaptions(c=>!c)} aria-label={zh?"切换字幕":"Toggle captions"}><Captions/></button><button onClick={()=>setSound(s=>{window.speechSynthesis?.cancel();return !s})} aria-label={zh?"中文旁白暂时静音":"Toggle narration"}>{zh||!sound?<VolumeX/>:<Volume2/>}</button></div>
+    </motion.div></motion.div>}</AnimatePresence>
+  </>
+}
 
 const faqsEn=[['Will this replace my sales team?','No. LeadFlow removes repetitive qualification and follow-up so your team can spend more time on conversations that require a human.'],['Does it work with our existing CRM?','Yes. LeadFlow is designed to connect with modern CRMs, forms, calendars and email tools. We map the integration during onboarding.'],['How quickly can we launch?','Most teams can launch an initial workflow in days, depending on integrations and qualification complexity.'],['Will the AI sound like our brand?','Yes. We configure tone, messaging, guardrails and escalation rules around your brand and sales process.'],['How is pricing determined?','Pricing reflects lead volume, integrations and workflow complexity. Book a demo and we’ll provide a clear, tailored quote.']];
 const faqsZh=[['会取代销售团队吗','不会 LeadFlow 接手重复的识别和跟进 让销售专注判断 关系和成交'],['现有 CRM 还能继续用吗','当然 主流 CRM 表单 日历和邮件工具都可接入 上线前我们会一起完成配置'],['多久能够上线','多数团队几天即可启用首个流程 实际时间取决于接入范围和意向规则'],['说话方式像我们的品牌吗','会 我们将品牌语气 销售话术 服务边界和人工接管规则逐一配置'],['如何确定方案','根据线索量 接入范围和流程复杂度灵活设计 演示后你会收到一份清晰方案']];
