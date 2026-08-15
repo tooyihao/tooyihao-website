@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, BarChart3, Bell, Check, ChevronDown, CirclePlay, Database, LayoutDashboard, LoaderCircle, MessageSquareText, Search, Send, Settings, Sparkles, Users, Zap } from "lucide-react";
 import { useI18n } from "@/i18n/provider";
@@ -79,7 +79,39 @@ export function LiveDemo(){
   </div>
 }
 
-export function ProductVideo(){const {locale}=useI18n();const zh=locale==="zh";const [playing,setPlaying]=useState(false);return <button aria-label={zh?"播放 AI LeadFlow 产品介绍":"Play AI LeadFlow product overview"} onClick={()=>setPlaying(!playing)} className={`video-stage ${playing?'playing':''}`}><div className="video-grid"/><div className="video-ui"><div className="video-side"/><div className="video-chart"><span>Qualified pipeline</span><strong>$284,000</strong><div className="chart-bars">{[30,45,38,58,65,61,82,94].map((h,i)=><i style={{height:`${h}%`}} key={i}/>)}</div></div><div className="video-leads">{['Sarah Chen · 94','Marcus Reid · 81','Elena Rossi · 76'].map(x=><p key={x}>{x}<Check size={13}/></p>)}</div></div><div className="video-overlay"><span className="play-button">{playing?<span className="pause">Ⅱ</span>:<CirclePlay/>}</span><p>{playing?(zh?'正在播放产品介绍':'Product tour playing'):(zh?'看看 AI LeadFlow 如何工作':'See AI LeadFlow in action')}</p><small>1:30</small></div></button>}
+const productNarration={
+  en:[
+    "Every customer message is a possible deal. But customers do not wait forever.",
+    "Slow replies lose deals. While your team is busy, the customer may already be talking to someone else.",
+    "AI LeadFlow responds from the first message, helping your business capture the opportunity immediately.",
+    "The system analyzes intent, buying signals, and urgency to decide which customers matter most.",
+    "High-intent customers are routed automatically. CRM is updated, replies are generated, and sales is notified.",
+    "Your sales team no longer has to guess who matters most. They can focus on the best opportunities.",
+    "Before, replies were manual and follow-up was easy to miss. After, AI responds instantly and moves the process forward.",
+    "That is AI LeadFlow. Faster response, more conversions, and less revenue lost.",
+  ],
+  zh:[
+    "每一次客户咨询，都是一次可能成交的机会。问题是，客户不会一直等。",
+    "回应慢了，客户可能已经找了别人。很多成交，不是输给产品，而是输给速度。",
+    "AI LeadFlow 从第一条消息开始，自动回应客户，先接住机会。",
+    "系统会判断客户意向，分析购买信号，并给出优先级。",
+    "高意向客户会自动进入流程，更新客户资料，生成回复，并提醒销售。",
+    "销售团队不再需要猜谁最重要，只需要专注真正值得跟进的人。",
+    "使用前，人工回复慢，跟进容易断。使用后，AI 即时回应，流程自动推进。",
+    "这就是 AI LeadFlow。更快回应，更多成交，更少流失。",
+  ],
+};
+
+export function ProductVideo(){
+  const {locale}=useI18n();const zh=locale==="zh";const [playing,setPlaying]=useState(false);const [narrationOn,setNarrationOn]=useState(true);const [unsupported,setUnsupported]=useState(false);const sceneRef=useRef(0);const timerRef=useRef<number|undefined>(undefined);const narrationRef=useRef(true);
+  const cancelNarration=useCallback(()=>{if(typeof window!=="undefined"&&"speechSynthesis" in window)window.speechSynthesis.cancel()},[]);
+  const speak=useCallback((scene:number)=>{if(!narrationRef.current||typeof window==="undefined"||!("speechSynthesis" in window)||typeof SpeechSynthesisUtterance==="undefined")return;const synthesis=window.speechSynthesis;const utterance=new SpeechSynthesisUtterance(productNarration[locale][scene]);utterance.lang=zh?"zh-CN":"en-US";utterance.rate=zh?.85:.95;utterance.pitch=1;utterance.volume=1;if(zh){const voices=synthesis.getVoices();utterance.voice=voices.find(voice=>voice.lang.toLowerCase()==="zh-cn")??voices.find(voice=>voice.lang.toLowerCase().startsWith("zh"))??null}synthesis.cancel();synthesis.speak(utterance)},[locale,zh]);
+  useEffect(()=>{setUnsupported(typeof window!=="undefined"&&(!("speechSynthesis" in window)||typeof SpeechSynthesisUtterance==="undefined"));return cancelNarration},[cancelNarration]);
+  useEffect(()=>{if(!playing)return;sceneRef.current=0;speak(0);timerRef.current=window.setInterval(()=>{const next=sceneRef.current+1;if(next>=productNarration.en.length){if(timerRef.current)window.clearInterval(timerRef.current);return}sceneRef.current=next;speak(next)},11250);return()=>{if(timerRef.current)window.clearInterval(timerRef.current)}},[playing,speak]);
+  const togglePlayback=()=>{if(playing)cancelNarration();else{cancelNarration();sceneRef.current=0}setPlaying(value=>!value)};
+  const toggleNarration=()=>{const next=!narrationOn;narrationRef.current=next;setNarrationOn(next);cancelNarration();if(next&&playing)window.setTimeout(()=>speak(sceneRef.current),0)};
+  return <div role="button" tabIndex={0} aria-label={zh?"播放 AI LeadFlow 产品介绍":"Play AI LeadFlow product overview"} onClick={togglePlayback} onKeyDown={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();togglePlayback()}}} className={`video-stage ${playing?'playing':''}`}><div className="video-grid"/><div className="video-ui"><div className="video-side"/><div className="video-chart"><span>Qualified pipeline</span><strong>$284,000</strong><div className="chart-bars">{[30,45,38,58,65,61,82,94].map((h,i)=><i style={{height:`${h}%`}} key={i}/>)}</div></div><div className="video-leads">{['Sarah Chen · 94','Marcus Reid · 81','Elena Rossi · 76'].map(x=><p key={x}>{x}<Check size={13}/></p>)}</div></div><div className="video-overlay"><span className="play-button">{playing?<span className="pause">Ⅱ</span>:<CirclePlay/>}</span><p>{playing?(zh?'正在播放产品介绍':'Product tour playing'):(zh?'看看 AI LeadFlow 如何工作':'See AI LeadFlow in action')}</p><small>1:30</small></div><div className="narration-control" onClick={event=>event.stopPropagation()} onKeyDown={event=>event.stopPropagation()}><button type="button" aria-pressed={narrationOn} onClick={toggleNarration} disabled={unsupported}>{narrationOn?(zh?"关闭旁白":"Narration Off"):(zh?"开启旁白":"Narration On")}</button>{unsupported&&<p role="status">{zh?"当前浏览器不支持旁白播放，请查看字幕。":"Narration is not supported in this browser. Captions are still available."}</p>}</div></div>
+}
 
 const faqsEn=[['Will this replace my sales team?','No. LeadFlow removes repetitive qualification and follow-up so your team can spend more time on conversations that require a human.'],['Does it work with our existing CRM?','Yes. LeadFlow is designed to connect with modern CRMs, forms, calendars and email tools. We map the integration during onboarding.'],['How quickly can we launch?','Most teams can launch an initial workflow in days, depending on integrations and qualification complexity.'],['Will the AI sound like our brand?','Yes. We configure tone, messaging, guardrails and escalation rules around your brand and sales process.'],['How is pricing determined?','Pricing reflects lead volume, integrations and workflow complexity. Book a demo and we’ll provide a clear, tailored quote.']];
 const faqsZh=[['会取代销售团队吗','不会 LeadFlow 接手重复的识别和跟进 让销售专注判断 关系和成交'],['现有 CRM 还能继续用吗','当然 主流 CRM 表单 日历和邮件工具都可接入 上线前我们会一起完成配置'],['多久能够上线','多数团队几天即可启用首个流程 实际时间取决于接入范围和意向规则'],['说话方式像我们的品牌吗','会 我们将品牌语气 销售话术 服务边界和人工接管规则逐一配置'],['如何确定方案','根据线索量 接入范围和流程复杂度灵活设计 演示后你会收到一份清晰方案']];
