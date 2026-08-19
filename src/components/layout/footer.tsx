@@ -1,3 +1,5 @@
 "use client";
-import {Container} from "@/components/ui/container";import {useI18n} from "@/i18n/provider";
-export function Footer(){const{messages:m}=useI18n();return <footer className="border-t border-line py-10"><Container className="flex flex-col gap-3 text-sm text-muted sm:flex-row sm:items-center sm:justify-between"><p className="font-semibold tracking-[.16em] text-ink">TOO YI HAO</p><p>{m.footer}</p><p>© {new Date().getFullYear()} Too Yi Hao</p></Container></footer>}
+import Link from "next/link";
+import {Container} from "@/components/ui/container";
+import {useI18n} from "@/i18n/provider";
+export function Footer(){const{locale}=useI18n();const z=locale==="zh";const groups=[[z?"AI Workers":"AI Workers",[["AI LeadFlow","/products/leadflow"],[z?"市集":"Marketplace","/#marketplace"]]],[z?"平台":"Platform",[[z?"价格":"Pricing","/#pricing"],[z?"集成":"Integrations","/#integrations"]]],[z?"资源":"Resources",[[z?"文档":"Documentation","/#faq"],[z?"帮助中心":"Help Center","/#faq"]]],[z?"公司":"Company",[[z?"关于":"About","/"]]],[z?"法律":"Legal",[[z?"隐私":"Privacy","/#"],[z?"条款":"Terms","/#"]]]];return <footer className="premium-footer"><Container><div className="footer-brand"><b>TOOYIHAO</b><p>AI Worker Platform</p></div><div className="footer-columns">{groups.map(g=><div key={g[0] as string}><h3>{g[0] as string}</h3>{(g[1] as string[][]).map(x=><Link href={x[1]} key={x[0]}>{x[0]}</Link>)}</div>)}</div><p className="copyright">© {new Date().getFullYear()} TOOYIHAO. {z?"保留所有权利":"All rights reserved."}</p></Container></footer>}
