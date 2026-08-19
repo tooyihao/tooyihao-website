@@ -4,8 +4,9 @@ import { ArrowDown, BriefcaseBusiness, Building2, Check, GraduationCap, HeartPul
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/ui/reveal";
 import { useI18n } from "@/i18n/provider";
+import { BrandLogo, type Brand } from "@/components/brand-logos";
 
-const brands = ["Google", "Gmail", "HubSpot", "Calendly", "Slack", "WhatsApp", "Meta Ads", "stripe"];
+const brands: Brand[] = ["Google", "Gmail", "HubSpot", "Calendly", "Slack", "WhatsApp", "Meta Ads", "stripe"];
 const businessIcons = [Megaphone, BriefcaseBusiness, GraduationCap, HeartPulse, Home, Building2];
 
 export function TrustSocialProof() {
@@ -17,7 +18,7 @@ export function TrustSocialProof() {
 
   return <section className="trust-proof" aria-label={zh ? "信任与客户成果" : "Trust and customer outcomes"}><Container>
     <Reveal><div className="trust-heading"><h2>{zh ? "无缝接入你已经在使用的工具" : "Works with the tools you already use"}</h2><p>{zh ? <>无需迁移<br/>无需复杂部署<br/>连接即可开始</> : <>No migration.<br/>No complicated setup.<br/>Just connect and start.</>}</p></div></Reveal>
-    <Reveal delay={.08} className="logo-cloud">{brands.map((brand,index)=><div className={`integration-logo integration-logo-${index}`} key={brand} aria-label={brand}><span aria-hidden="true">{["G","M","✣","C","#","◉","∞","S"][index]}</span><b>{brand}</b></div>)}</Reveal>
+    <Reveal delay={.08} className="logo-cloud">{brands.map((brand,index)=><div className={`integration-logo integration-logo-${index}`} key={brand} aria-label={brand}><BrandLogo brand={brand}/><b>{brand}</b></div>)}</Reveal>
     <div className="trust-divider"/>
     <Reveal><h2 className="trust-subtitle">{zh ? "专为成长中的团队打造" : "Built for growing businesses"}</h2></Reveal>
     <div className="business-grid">{businesses.map((business,index)=>{const Icon=businessIcons[index];return <Reveal key={business} delay={index*.04}><article className="business-card"><span><Icon size={21} strokeWidth={1.65}/></span><h3>{business}</h3></article></Reveal>})}</div>
